@@ -22,7 +22,7 @@ function woocommerce_zarinpalwg_init() {
         public function __construct(){
             // Go wild in here
             $this -> id = 'zarinpalwg';
-            $this -> method_title = __('درگاه زرین پال', 'zarinpalwg');
+            $this -> method_title = __('درگاه زرین پال - وب گیت', 'zarinpalwg');
             $this -> has_fields = false;
             $this -> init_form_fields();
             $this -> init_settings();
@@ -52,13 +52,13 @@ function woocommerce_zarinpalwg_init() {
                 'enabled' => array(
                     'title' => __('فعال سازی/غیر فعال سازی', 'zarinpalwg'),
                     'type' => 'checkbox',
-                    'label' => __('فعال سازی درگاه پرداخت zarinpalwg', 'zarinpalwg'),
+                    'label' => __('فعال سازی درگاه پرداخت وب گیت زرین پال', 'zarinpalwg'),
                     'default' => 'no'),
                 'title' => array(
                     'title' => __('عنوان:', 'zarinpalwg'),
                     'type'=> 'text',
                     'description' => __('عنوانی که کاربر در هنگام پرداخت مشاهده می کند', 'zarinpalwg'),
-                    'default' => __('پرداخت اینترنتی zarinpalwg', 'zarinpalwg')),
+                    'default' => __('پرداخت اینترنتی وب گیت زرین وب گیت', 'zarinpalwg')),
                 'description' => array(
                     'title' => __('توضیحات:', 'zarinpalwg'),
                     'type' => 'textarea',
