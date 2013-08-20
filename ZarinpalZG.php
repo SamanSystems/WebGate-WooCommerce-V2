@@ -151,7 +151,7 @@ function woocommerce_zarinpalwg_init() {
 				{
 					
 					$output[status]	= 0;
-					$output[message]= 'پرداخت توسط زرین پال تایید نشد‌.';
+					$output[message]= 'پرداخت توسط زرین پال تایید نشد‌.'.$res['Status'];
 				}
 			
 
@@ -213,7 +213,7 @@ function woocommerce_zarinpalwg_init() {
 		else
 		{
 			$this -> msg['class'] = 'error';
-			echo $this -> msg['message'] = '<font color="red">در اتصال به درگاه زرین پال مشکلی به وجود آمد٬ لطفا از درگاه سایر بانک‌ها استفاده نمایید.</font>'.$res;
+			echo $this -> msg['message'] = '<font color="red">در اتصال به درگاه زرین پال مشکلی به وجود آمد٬ لطفا از درگاه سایر بانک‌ها استفاده نمایید.</font>'.$res['Status'];
 
 		}
 		
