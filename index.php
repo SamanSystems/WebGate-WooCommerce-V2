@@ -8,7 +8,7 @@ Author: مسعود امینی
 Author URI: http://MasoudAmini.ir
 Copyright: 2013 MasoudAmini.ir
  */
-
+require_once("lib/nusoap.php");
 add_action('plugins_loaded', 'woocommerce_zarinpalwebgate_init', 0);
 
 function woocommerce_zarinpalwebgate_init() {
@@ -129,7 +129,7 @@ if($_GET['msg']!=''){
 		$st		= $_GET['Status'];
 
 			$amount		= round($order -> order_total/10);
-			$client = new soap_client('https://de.zarinpal.com/pg/services/WebGate/wsdl', 'wsdl');
+			$client = new nusoap_client('https://de.zarinpal.com/pg/services/WebGate/wsdl', 'wsdl');
 			$res = $client->call("PaymentVerification", array(
 					array(
 							'MerchantID'	 => $merchantID ,
@@ -156,70 +156,67 @@ if($_GET['msg']!=''){
 					$this -> msg['class']	= 'error';
 					$this -> msg['message']= 'پرداخت توسط زرین پال تایید نشد‌.'.$res['Status'];
 				}
-			
+			}
+			}
 
 		
 		if ($output[status] == 0)
 				$order -> add_order_note($output[message]);
         
-        
+        }
         function showMessage($content){
             return '<div class="box '.$this -> msg['class'].'-box">'.$this -> msg['message'].'</div>'.$content;
         }
 
 
         public function generate_zarinpalwebgate_form($order_id){
-            global $woocommerce;
-            $order = new WC_Order($order_id);
+		
+			global $woocommerce;
+            $order = &new WC_Order($order_id);
             $redirect_url = ($this -> redirect_page_id=="" || $this -> redirect_page_id==0)?get_site_url() . "/":get_permalink($this -> redirect_page_id);
 			$redirect_url = add_query_arg( 'wc-api', get_class( $this ), $redirect_url );
 			unset( $woocommerce->session->zegersot );
 			unset( $woocommerce->session->zegersot_id );
 			$woocommerce->session->zegersot = $order_id;
-			$url = 'http://zarinpalwebgate.ir/payment/gateway-send'; 
-			$api=$this -> merchant_id;
-			$amount = $order -> order_total; 
-			if($this -> vahed=='toman')
-			$amount = $amount*10;
-			$redirect = urlencode($redirect_url); 
-			$result = $this ->send($url,$api,$amount,$redirect); 
-			if($result > 0 && is_numeric($result)){ 
-			$woocommerce->session->zegersot_id=$result;
-			$go = "http://zarinpalwebgate.ir/payment/gateway-$result"; 
-			header("Location: $go"); 
-			}else if($result=='-1'){
-			echo "api ارسالي با نوغ api تعريف شده در zarinpalwebgate سازگار نيست";
-			}else if($result=='-2'){
-			echo "مقدار مبلغ نبايد کمتر از 1000 ريال باشد";
-			}else if($result=='-3'){
-			echo "error";
-			}else if($result=='-4'){
-			echo "درگاهي با اطلاعات ارسالي شما يافت نشده و يا در حالت انتظار مي باشد";
-			}
-		
+			$_SESSION['zarinpalwg_id'] = $order_id;
+                $merchantID         = $this -> merchant_id;
+                $amount                 = $order -> order_total;
+				if($this -> vahed=='toman')
+					$amount = $amount*10;
+                $invoice_id=date('Y').date('H').date('i').date('s').$order_id;
+                $callBackUrl         = $redirect_url;
+                $client = new nusoap_client('https://de.zarinpal.com/pg/services/WebGate/wsdl', 'wsdl');
+                $res = $client->call('PaymentRequest', array(
+                array(
+                                        'MerchantID'         => $merchantID ,
+                                        'Amount'         => $amount ,
+                                        'Description'         => $order_id ,
+                                        'Email'         => '' ,
+                                        'Mobile'         => '' ,
+                                        'CallbackURL'         => $callBackUrl
+
+                                        )
+         ));
+       
+                if ($res['Status'] == 100)
+                {
+                        header('location: https://www.zarinpal.com/pg/StartPay/' . $res['Authority']);
+                        exit;
+                }
+                else
+                {
+                        $this -> msg['class'] = 'error';
+                        echo $this -> msg['message'] = '<font color="red">در اتصال به درگاه زرین پال مشکلی به وجود آمد</font>'.$res['Status'];
+
+                }
+              
+        if($this -> msg['class']=='error')
+        $order -> add_order_note($this->msg['message']);        
 
         }
+
+        
 		
-private function send($url,$api,$amount,$redirect){ 
-    $ch = curl_init(); 
-    curl_setopt($ch,CURLOPT_URL,$url); 
-    curl_setopt($ch,CURLOPT_POSTFIELDS,"api=$api&amount=$amount&redirect=$redirect"); 
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE); 
-    curl_setopt($ch,CURLOPT_RETURNTRANSFER,true); 
-    $res = curl_exec($ch); 
-    curl_close($ch); 
-    return $res; 
-}
-	private function get($url,$api,$trans_id,$id_get){ 
-    $ch = curl_init(); 
-    curl_setopt($ch,CURLOPT_URL,$url); 
-    curl_setopt($ch,CURLOPT_POSTFIELDS,"api=$api&id_get=$id_get&trans_id=$trans_id"); 
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE); 
-    curl_setopt($ch,CURLOPT_RETURNTRANSFER,true); 
-    $res = curl_exec($ch); 
-    curl_close($ch); 
-    return $res; 
-} 
         function get_pages($title = false, $indent = true) {
             $wp_pages = get_pages('sort_column=menu_order');
             $page_list = array();
