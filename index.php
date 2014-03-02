@@ -6,7 +6,7 @@ Description: توسعه داده شده توسط مسعود امینی
 Version: 3.1
 Author: مسعود امینی
 Author URI: http://MasoudAmini.ir
-Copyright: 2013 MasoudAmini.ir
+Copyright: 2014 MasoudAmini.ir
  */
 require_once("lib/nusoap.php");
 add_action('plugins_loaded', 'woocommerce_zarinpalwebgate_init', 0);
@@ -113,9 +113,7 @@ if($_GET['msg']!=''){
 
         function process_payment($order_id){
             $order = &new WC_Order($order_id);
-            return array('result' => 'success', 'redirect' => add_query_arg('order',
-                $order->id, add_query_arg('key', $order->order_key, get_permalink(get_option('woocommerce_pay_page_id'))))
-            );
+            return array('result' => 'success', 'redirect' => $order->get_checkout_payment_url( true )); 
         }
 
        function check_zarinpalwebgate_response(){
@@ -156,14 +154,17 @@ if($_GET['msg']!=''){
 					$this -> msg['class']	= 'error';
 					$this -> msg['message']= 'پرداخت توسط زرین پال تایید نشد‌.'.$res['Status'];
 				}
+			}else{
+			$this -> msg['class'] = 'error';
+        $this -> msg['message'] = "قبلا اين سفارش به ثبت رسيده يا صفارشي موجود نيست!";
 			}
 			}
+			$redirect_url = ($this -> redirect_page_id=="" || $this -> redirect_page_id==0)?get_site_url() . "/":get_permalink($this -> redirect_page_id);
+                $redirect_url = add_query_arg( array('msg'=> base64_encode($this -> msg['message']), 'type'=>$this -> msg['class']), $redirect_url );
 
+                wp_redirect( $redirect_url );
+		}
 		
-		if ($output[status] == 0)
-				$order -> add_order_note($output[message]);
-        
-        }
         function showMessage($content){
             return '<div class="box '.$this -> msg['class'].'-box">'.$this -> msg['message'].'</div>'.$content;
         }
@@ -172,7 +173,7 @@ if($_GET['msg']!=''){
         public function generate_zarinpalwebgate_form($order_id){
 		
 			global $woocommerce;
-            $order = &new WC_Order($order_id);
+            $order = new WC_Order($order_id);
             $redirect_url = ($this -> redirect_page_id=="" || $this -> redirect_page_id==0)?get_site_url() . "/":get_permalink($this -> redirect_page_id);
 			$redirect_url = add_query_arg( 'wc-api', get_class( $this ), $redirect_url );
 			unset( $woocommerce->session->zegersot );
@@ -182,11 +183,13 @@ if($_GET['msg']!=''){
                 $merchantID         = $this -> merchant_id;
                 $amount                 = $order -> order_total;
 				if($this -> vahed=='toman')
-					$amount = $amount*10;
+				{
+				$amount = $amount*10;
+				}
                 $invoice_id=date('Y').date('H').date('i').date('s').$order_id;
                 $callBackUrl         = $redirect_url;
                 $client = new nusoap_client('https://de.zarinpal.com/pg/services/WebGate/wsdl', 'wsdl');
-                $res = $client->call('PaymentRequest', array(
+                $res = $client->call("PaymentRequest", array(
                 array(
                                         'MerchantID'         => $merchantID ,
                                         'Amount'         => $amount ,
@@ -205,15 +208,14 @@ if($_GET['msg']!=''){
                 }
                 else
                 {
+				print_r($res['Status']);
                         $this -> msg['class'] = 'error';
                         echo $this -> msg['message'] = '<font color="red">در اتصال به درگاه زرین پال مشکلی به وجود آمد</font>'.$res['Status'];
 
                 }
+		}
               
-        if($this -> msg['class']=='error')
-        $order -> add_order_note($this->msg['message']);        
 
-        }
 
         
 		
