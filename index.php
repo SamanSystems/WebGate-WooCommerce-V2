@@ -3,12 +3,12 @@
 Plugin Name: درگاه پرداخت وب گیت زرین پال برای ووکامرس
 Plugin URI: http://woocommerce.ir
 Description: توسعه داده شده توسط مسعود امینی
-Version: 3.1
+Version: 3.3
 Author: مسعود امینی
 Author URI: http://MasoudAmini.ir
 Copyright: 2014 MasoudAmini.ir
  */
-require_once("lib/nusoap.php");
+require_once("lib/nusoap.php");add_action
 add_action('plugins_loaded', 'woocommerce_zarinpalwebgate_init', 0);
 
 function woocommerce_zarinpalwebgate_init() {
@@ -38,7 +38,7 @@ if($_GET['msg']!=''){
             $this -> redirect_page_id = $this -> settings['redirect_page_id'];
             $this -> msg['message'] = "";
             $this -> msg['class'] = "";
-			add_action( 'woocommerce_api_' . strtolower( get_class( $this ) ), array( $this, 'check_zarinpalwebgate_response' ) );
+			add_action( 'woocommerce_api_wc_zarinpalwebgate, array( $this, 'check_zarinpalwebgate_response' ) );
             add_action('valid-zarinpalwebgate-request', array($this, 'successful_request'));
 			
 			
@@ -49,6 +49,7 @@ if($_GET['msg']!=''){
             }
 			
             add_action('woocommerce_receipt_zarinpalwebgate', array($this, 'receipt_page'));
+            add_action('woocommerce_thankyou_zarinpalwebgate',array($this, 'thankyou_page'));  
         }
 
         function init_form_fields(){
@@ -112,14 +113,14 @@ if($_GET['msg']!=''){
         }
 
         function process_payment($order_id){
-            $order = &new WC_Order($order_id);
+            $order = new WC_Order($order_id);
             return array('result' => 'success', 'redirect' => $order->get_checkout_payment_url( true )); 
         }
 
        function check_zarinpalwebgate_response(){
             global $woocommerce;
 		$order_id = $woocommerce->session->zegersot;
-		$order = &new WC_Order($order_id);
+		$order = new WC_Order($order_id);
 		if($order_id != ''){
 		if($order -> status !='completed'){
 		$merchantID=$this -> merchant_id;
