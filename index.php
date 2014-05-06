@@ -251,7 +251,7 @@ function woocommerce_Zarinpalwg_init() {
 
             $Status2 = $result['Status'];
 			$PayPath = 'https://www.zarinpal.com/pg/StartPay/' . $result['Authority'];
-			if ($Status != 100 ) {
+			if ($Status2 != 100 ) {
 				$this -> msg['class'] = 'error';
                 $this -> msg['message'] = $Status;
                 echo '<div class="woocommerce-error"> در اتصال به درگاه پرداخت خطايي رخ داده است ! وضعيت خطا : '.$Status2.'</div>';
