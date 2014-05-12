@@ -1,2 +1,0 @@
-WebGate-WooCommece-V2
-=====================
