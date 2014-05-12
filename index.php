@@ -8,19 +8,20 @@ Author: MasoudAmini
 Author URI: http://www.masoudamini.ir
  */
 
- if(!class_exists('nusoap_client'))
-require_once("nusoap.php");
-add_action('plugins_loaded', 'woocommerce_Zarinpalwg_init', 0);
+if (!class_exists('nusoap_client')) {
+	require_once("nusoap.php");
+}
+add_action('plugins_loaded', 'woocommerce_zarinpalwg_init', 0);
 
-function woocommerce_Zarinpalwg_init() {
+function woocommerce_zarinpalwg_init() {
 
     if ( !class_exists( 'WC_Payment_Gateway' ) ) return;
 
 	if($_GET['msg']!=''){
-        add_action('the_content', 'showZarinpalwgMessage');
+        add_action('the_content', 'showzarinpalwgMessage');
     }
 
-    function showZarinpalwgMessage($content){
+    function showzarinpalwgMessage($content){
             $neclss = htmlentities($_GET['type']);
             if($neclss == 'success')
                 $neclss = 'message';
@@ -31,7 +32,7 @@ function woocommerce_Zarinpalwg_init() {
 	protected $msg = array();
         public function __construct(){
             // Go wild in here
-            $this -> id = 'Zarinpalwg';
+            $this -> id = 'zarinpalwg';
             $this -> method_title = __('زرین پال', 'mrova');
             $this -> icon = WP_PLUGIN_URL . "/" . plugin_basename(dirname(__FILE__)) . '/images/logo.png';
             $this -> has_fields = false;
@@ -47,15 +48,15 @@ function woocommerce_Zarinpalwg_init() {
 			$this -> msg['message'] = "";
             $this -> msg['class'] = "";
 
-            add_action( 'woocommerce_api_wc_Zarinpalwg_pay' , array( $this, 'check_Zarinpalwg_response' ) );
-            add_action('valid-Zarinpalwg-request', array($this, 'successful_request'));
+            add_action( 'woocommerce_api_wc_zarinpalwg_pay' , array( $this, 'check_zarinpalwg_response' ) );
+            add_action('valid-zarinpalwg-request', array($this, 'successful_request'));
             if ( version_compare( WOOCOMMERCE_VERSION, '2.0.0', '>=' ) ) {
                 add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
              } else {
                 add_action( 'woocommerce_update_options_payment_gateways', array( $this, 'process_admin_options' ) );
             }
-            add_action('woocommerce_receipt_Zarinpalwg', array($this, 'receipt_page'));
-            add_action('woocommerce_thankyou_Zarinpalwg',array($this, 'thankyou_page'));
+            add_action('woocommerce_receipt_zarinpalwg', array($this, 'receipt_page'));
+            add_action('woocommerce_thankyou_zarinpalwg',array($this, 'thankyou_page'));
         }
 
         function init_form_fields(){
@@ -103,7 +104,7 @@ function woocommerce_Zarinpalwg_init() {
 
         }
         /**
-         *  There are no payment fields for Zarinpalwg, but we want to show the description if set.
+         *  There are no payment fields for zarinpalwg, but we want to show the description if set.
          **/
         function payment_fields(){
             if($this -> description) echo wpautop(wptexturize($this -> description));
@@ -113,7 +114,7 @@ function woocommerce_Zarinpalwg_init() {
          **/
         function receipt_page($order){
             echo '<p>'.__('از سفارش شما متشکريم ، تا انتقال به درگاه پرداخت چند لحظه منتظر بمانيد ...', 'mrova').'</p>';
-            echo $this -> generate_Zarinpalwg_form($order);
+            echo $this -> generate_zarinpalwg_form($order);
         }
         /**
          * Process the payment and return the result
@@ -123,9 +124,9 @@ function woocommerce_Zarinpalwg_init() {
             return array('result' => 'success', 'redirect' => $order->get_checkout_payment_url( true ));
         }
         /**
-         * Check for valid Zarinpalwg server callback
+         * Check for valid zarinpalwg server callback
          **/
-       function check_Zarinpalwg_response(){
+       function check_zarinpalwg_response(){
         global $woocommerce;
 		$client = new nusoap_client('https://de.zarinpal.com/pg/services/WebGate/wsdl', 'wsdl');
 		$client->soap_defencoding = 'UTF-8';
@@ -133,9 +134,10 @@ function woocommerce_Zarinpalwg_init() {
 		$Authority = $_GET['Authority'];
 
 		$MerchantID = $this -> merchantid;
-		$order_id = $woocommerce->session->Zarinpalwg_woo_id;
+		$order_id = $woocommerce->session->zarinpalwg_woo_id;
 		$order = new WC_Order($order_id);
-		if($Status!="OK"){
+		if($Status != "OK"){
+print_r($Status);
     		$this -> msg['status'] = -1;
     		$this -> msg['message']= 'خطا در عمليات پرداخت ! عمليا پرداخت با موفقيت به پايان نرسيده است !';
 		}
@@ -160,7 +162,7 @@ function woocommerce_Zarinpalwg_init() {
 
 						if(strtolower($Status2) == 100 )
 						{
-                                unset($woocommerce->session->Zarinpalwg_woo_id);
+                                unset($woocommerce->session->zarinpalwg_woo_id);
                                 $this -> msg['status'] = 1;
                                 $this -> msg['message'] ='پرداخت با موفقیت انجام گردید.';
                                 $order -> payment_complete();
@@ -205,10 +207,10 @@ function woocommerce_Zarinpalwg_init() {
 
         
         /**
-         * Generate Zarinpalwg button link
+         * Generate zarinpalwg button link
          **/
 
-      public function generate_Zarinpalwg_form($order_id){
+      public function generate_zarinpalwg_form($order_id){
             global $woocommerce;
             $order = &new WC_Order($order_id);
             $redirect_url = ($this -> redirect_page_id=="" || $this -> redirect_page_id==0)?get_site_url() . "/":get_permalink($this -> redirect_page_id);
@@ -220,8 +222,8 @@ function woocommerce_Zarinpalwg_init() {
 		$client->soap_defencoding = 'UTF-8';
 		$MerchantID = $this -> merchantid;
 		$orderId=rand(1, 9999999999999);
-		unset($woocommerce->session->Zarinpalwg_woo_id);
-		$woocommerce->session->Zarinpalwg_woo_id = $order_id;
+		unset($woocommerce->session->zarinpalwg_woo_id);
+		$woocommerce->session->zarinpalwg_woo_id = $order_id;
 		$amount = str_replace(".00", "", $order -> order_total);;
 		$callBackUrl = $redirect_url;
 		$payerId = '0';
@@ -321,12 +323,12 @@ function woocommerce_Zarinpalwg_init() {
     /**
      * Add the Gateway to WooCommerce
      **/
-    function woocommerce_add_Zarinpalwg_gateway($methods) {
+    function woocommerce_add_zarinpalwg_gateway($methods) {
         $methods[] = 'WC_Zarinpalwg_Pay';
         return $methods;
     }
 
-    add_filter('woocommerce_payment_gateways', 'woocommerce_add_Zarinpalwg_gateway' );
+    add_filter('woocommerce_payment_gateways', 'woocommerce_add_zarinpalwg_gateway' );
 }
 
 ?>
