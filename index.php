@@ -164,7 +164,7 @@ print_r($Status);
 						{
                                 unset($woocommerce->session->zarinpalwg_woo_id);
                                 $this -> msg['status'] = 1;
-                                $this -> msg['message'] ='پرداخت با موفقیت انجام گردید.';
+                                $this -> msg['message'] ='پرداخت انجام گردید<br/>شماره رسيد پرداخت: '.$result['RefID'];
                                 $order -> payment_complete();
                                 $order -> add_order_note('پرداخت انجام گردید<br/>شماره رسيد پرداخت: '.$result['RefID'] );
                                 $order -> add_order_note($this -> msg['message']);
