@@ -321,6 +321,12 @@ function Load_ZarinPal_Gateway() {
                                 $Transaction_ID = $result->RefID;
                                 $Fault = '';
                                 $Message = '';
+				}
+				elseif ($result->Status == 101)
+				{
+				$Transaction_ID = $result->RefID;
+                                $Fault = '';
+                                $Message = '';
                             } else {
                                 $Status = 'failed';
                                 $Fault = $result->Status;
